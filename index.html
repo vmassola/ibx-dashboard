@@ -765,6 +765,9 @@
                 title="Rodar backtest com histórico da Binance (500 candles)">
                 🕐 Backtest Histórico
             </button>
+            <div style="font-size:12px; color:#aaa; display:flex; align-items:center; gap:8px;">
+                🌡️ Sentimento: <span id="fngDisplay" style="font-size:12px;">carregando...</span>
+            </div>
             <div class="audit-counter">
                 Registros: <span id="auditCount">0</span> / 1000
                 <span id="auditStats" style="font-size:12px; color:#aaa;"></span>
@@ -1185,6 +1188,8 @@
                 longShort: { weight: 10, buy: false, sell: false, name: 'Long/Short' },
                 // Taker Ratio (peso: 10)
                 taker:     { weight: 10, buy: false, sell: false, name: 'Taker Ratio' },
+                // Fear & Greed Index (peso: 8) — sentimento macro do mercado
+                fearGreed: { weight: 8,  buy: false, sell: false, name: 'Fear & Greed' },
             };
             
             // 1. Tendência EMAs
@@ -1293,6 +1298,19 @@
                 if (tr < 0.85) indicators.taker.sell = true;
             }
 
+            // Fear & Greed Index — contexto macro
+            if (marketData.fngValue !== undefined) {
+                const fv = marketData.fngValue;
+                // Extreme Fear (<25) = oportunidade de compra contrária
+                if (fv <= 25) indicators.fearGreed.buy  = true;
+                // Extreme Greed (>75) = mercado sobreaquecido = venda
+                else if (fv >= 75) indicators.fearGreed.sell = true;
+                // Fear moderado (26-45) + sinal de compra = confirma
+                else if (fv <= 45 && signal === 'COMPRA') indicators.fearGreed.buy = true;
+                // Greed moderado (56-74) + sinal de venda = confirma
+                else if (fv >= 56 && signal === 'VENDA') indicators.fearGreed.sell = true;
+            }
+
             // Calcular pontuação
             for (const key in indicators) {
                 const ind = indicators[key];
@@ -1344,6 +1362,7 @@
                 openInterest: marketData.openInterest,
                 lsRatio: marketData.lsRatio,
                 takerRatio: marketData.takerRatio,
+                fngValue: marketData.fngValue,
             };
         }
 
@@ -1351,9 +1370,47 @@
         // BUSCAR DADOS DA BINANCE
         // ==========================================
 
-        // Cache de dados de mercado (funding/OI/LS/Taker) — atualizado a cada ciclo
+        // Cache de dados de mercado (funding/OI/LS/Taker/FNG) — atualizado a cada ciclo
         const _marketDataCache = {};
         let _marketDataTs = 0;
+
+        // Fear & Greed Index — atualizado a cada hora (muda 1x por dia)
+        let _fngCache = null;
+        let _fngTs = 0;
+
+        async function fetchFearGreed() {
+            if (_fngCache && Date.now() - _fngTs < 3600000) return _fngCache; // cache 1h
+            try {
+                const r = await fetch('https://api.alternative.me/fng/?limit=1');
+                if (!r.ok) return null;
+                const data = await r.json();
+                const val = data?.data?.[0];
+                if (!val) return null;
+                _fngCache = {
+                    value:      parseInt(val.value),
+                    label:      val.value_classification,  // 'Extreme Fear', 'Fear', etc.
+                    timestamp:  val.timestamp,
+                };
+                _fngTs = Date.now();
+                _renderFearGreed(_fngCache);
+                return _fngCache;
+            } catch(e) {
+                return null;
+            }
+        }
+
+        function _renderFearGreed(fng) {
+            const el = document.getElementById('fngDisplay');
+            if (!el || !fng) return;
+            const v = fng.value;
+            const color = v <= 25 ? '#ff4757'    // Extreme Fear
+                        : v <= 45 ? '#ffa502'    // Fear
+                        : v <= 55 ? '#eccc68'    // Neutral
+                        : v <= 75 ? '#7bed9f'    // Greed
+                        :           '#2ed573';   // Extreme Greed
+            const emoji = v <= 25 ? '😱' : v <= 45 ? '😰' : v <= 55 ? '😐' : v <= 75 ? '😊' : '🤑';
+            el.innerHTML = `${emoji} <span style="color:${color};font-weight:bold">${fng.label}</span> <span style="color:#aaa">(${v}/100)</span>`;
+        }
 
         async function fetchMarketData(symbol) {
             // Reutilizar cache por 3 minutos
@@ -1402,6 +1459,9 @@
             } catch(e) {
                 console.warn(`[IBX] marketData fetch error ${symbol}:`, e);
             }
+            // Adicionar Fear & Greed ao marketData
+            const fng = await fetchFearGreed();
+            if (fng) data.fngValue = fng.value;
             _marketDataCache[cacheKey] = data;
             _marketDataTs = now;
             return data;
@@ -1947,6 +2007,7 @@
                 openInterest: signal.openInterest !== undefined ? signal.openInterest : '',
                 lsRatio:      signal.lsRatio      !== undefined ? signal.lsRatio      : '',
                 takerRatio:   signal.takerRatio   !== undefined ? signal.takerRatio   : '',
+                fngValue:     signal.fngValue     !== undefined ? signal.fngValue     : '',
                 // ── Status do backfill
                 _pending:       true, // flag interna — removida no CSV
                 _pendingWindows: AUDIT_CONFIG.windows.map(w => w.key)
@@ -2161,7 +2222,7 @@
                 'maxGainPct','maxLossPct',
                 'hitTP','hitSL','firstHit','resolvedAt',
                 'passedEliteFilter',
-                'fundingRate','openInterest','lsRatio','takerRatio'
+                'fundingRate','openInterest','lsRatio','takerRatio','fngValue'
             ];
 
             const csvRows = [headers.join(',')];
@@ -2285,6 +2346,8 @@
             if (!isRunning) return;
             cycleCount++;
             console.log(`[IBX] Ciclo #${cycleCount} — timeframe: ${CONFIG.mainTimeframe}`);
+            // Atualizar Fear & Greed a cada ciclo (tem cache interno de 1h)
+            fetchFearGreed();
             try {
                 const data = await fetchAllData();
                 renderSignals(data);
