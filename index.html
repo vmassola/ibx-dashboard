@@ -765,8 +765,14 @@
                 title="Rodar backtest com histórico da Binance (500 candles)">
                 🕐 Backtest Histórico
             </button>
+            <button id="btnTimeToggle" class="btn-audit" onclick="toggleTimeFilter()"
+                style="background:rgba(0,212,255,0.15);color:#00d4ff;border:1px solid rgba(0,212,255,0.4);"
+                title="Filtro horário: bloqueia 09-12h UTC (abertura europeia — 12% acerto)">
+                🕐 Horário ON
+            </button>
             <div style="font-size:12px; color:#aaa; display:flex; align-items:center; gap:8px;">
-                🌡️ Sentimento: <span id="fngDisplay" style="font-size:12px;">carregando...</span>
+                🕐 UTC: <span id="utcClock" style="font-size:12px;color:#ffd700;font-weight:bold;">--:--</span>
+                &nbsp;|&nbsp; 🌡️ <span id="fngDisplay" style="font-size:12px;">carregando...</span>
             </div>
             <div class="audit-counter">
                 Registros: <span id="auditCount">0</span> / 1000
@@ -805,7 +811,42 @@
             slMultiplier: 1.0,           // SL 1.0x ATR (ratio TP/SL = 3:1)
             mainTimeframe: '4h',         // Timeframe principal de análise
             mainTimeframeLabel: '4 horas',
+            // Filtro horário — bloqueia 09-12h UTC (abertura europeia = 12% acerto)
+            timeFilterEnabled: true,
+            timeFilterBlockStart: 9,     // hora UTC início bloqueio (inclusive)
+            timeFilterBlockEnd: 12,      // hora UTC fim bloqueio (exclusive)
         };
+
+        // ── Filtro horário ────────────────────────────────────────────
+        // Baseado em backtest: 09-12h UTC = abertura europeia = 12% acerto
+        // Fora desse período: 45.9% geral / 70% elite venda
+        function passesTimeFilter() {
+            if (!CONFIG.timeFilterEnabled) return true;
+            const hourUTC = new Date().getUTCHours();
+            if (hourUTC >= CONFIG.timeFilterBlockStart && hourUTC < CONFIG.timeFilterBlockEnd) {
+                return false; // bloqueado
+            }
+            return true;
+        }
+
+        function toggleTimeFilter() {
+            CONFIG.timeFilterEnabled = !CONFIG.timeFilterEnabled;
+            const btn = document.getElementById('btnTimeToggle');
+            if (btn) {
+                if (CONFIG.timeFilterEnabled) {
+                    btn.textContent = '🕐 Horário ON';
+                    btn.style.background = 'rgba(0,212,255,0.15)';
+                    btn.style.color = '#00d4ff';
+                    btn.style.border = '1px solid rgba(0,212,255,0.4)';
+                } else {
+                    btn.textContent = '🕐 Horário OFF';
+                    btn.style.background = 'rgba(150,150,150,0.1)';
+                    btn.style.color = '#888';
+                    btn.style.border = '1px solid rgba(150,150,150,0.3)';
+                }
+            }
+            if (lastData) renderSignals(lastData);
+        }
 
         // ── Troca de timeframe em tempo real ─────────────────────────
         function changeTimeframe(val) {
@@ -822,6 +863,8 @@
         function passesEliteFilter(asset) {
             if (!CONFIG.eliteFilterEnabled) return true;
             if (asset.signal === 'NEUTRO') return false;
+            // Filtro horário: bloquear 09-12h UTC
+            if (!passesTimeFilter()) return false;
             if (asset.regime !== 'trending') return false;
             if (asset.confluence < CONFIG.eliteMinConfluence) return false;
             const inds = Object.values(asset.indicators || {});
@@ -1968,6 +2011,7 @@
             const record = {
                 id:                `${signal.symbol}_${now}`,
                 timeframe:         CONFIG.mainTimeframe,
+                hourUTC:           new Date(now).getUTCHours(),
                 timestamp:         new Date(now).toISOString(),
                 symbol:            signal.symbol,
                 signal:            signal.signal,
@@ -2210,7 +2254,7 @@
             }
 
             const headers = [
-                'id','timestamp','symbol','signal','timeframe','confluence','isStrong',
+                'id','timestamp','symbol','signal','timeframe','hourUTC','confluence','isStrong',
                 'entryPrice','rsi','regime','volumeRatio',
                 'buyConfluence','sellConfluence','indicatorCount',
                 'tpPrice','slPrice','tpPct','slPct',
@@ -2341,6 +2385,30 @@
         let isRunning = true;
         let cycleCount = 0;
         let _loopTimeout = null;
+
+        // Relógio UTC em tempo real
+        function _startUTCClock() {
+            function _tick() {
+                const now = new Date();
+                const h = String(now.getUTCHours()).padStart(2,'0');
+                const m = String(now.getUTCMinutes()).padStart(2,'0');
+                const s = String(now.getUTCSeconds()).padStart(2,'0');
+                const el = document.getElementById('utcClock');
+                if (el) {
+                    const blocked = CONFIG.timeFilterEnabled &&
+                        now.getUTCHours() >= CONFIG.timeFilterBlockStart &&
+                        now.getUTCHours() < CONFIG.timeFilterBlockEnd;
+                    el.textContent = `${h}:${m}:${s}`;
+                    el.style.color = blocked ? '#ff4757' : '#ffd700';
+                    el.title = blocked
+                        ? '⛔ Período bloqueado (09-12h UTC) — sinais suspensos'
+                        : '✅ Período ativo — sinais liberados';
+                }
+            }
+            _tick();
+            setInterval(_tick, 1000);
+        }
+        _startUTCClock();
 
         async function runMonitoringLoop() {
             if (!isRunning) return;
