@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBX Command Center - Master Elite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f23 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .logo h1 {
+            font-size: 26px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo p {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .header-stat {
+            text-align: center;
+        }
+        
+        .header-stat .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .header-stat .value.buy { color: #00ff88; }
+        .header-stat .value.sell { color: #ff4757; }
+        
+        .header-stat .label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-bar .left {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-item .icon {
+            font-size: 18px;
+        }
+        
+        .info-item .text {
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .info-item .text strong {
+            color: #fff;
+        }
+        
+        .update-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .update-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .signals-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title .icon {
+            font-size: 24px;
+        }
+        
+        .section-title.buy { color: #00ff88; }
+        .section-title.sell { color: #ff4757; }
+        
+        .signals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+        
+        .signal-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .signal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .signal-card.buy {
+            border-left: 4px solid #00ff88;
+        }
+        
+        .signal-card.sell {
+            border-left: 4px solid #ff4757;
+        }
+        
+        .signal-card.strong::before {
+            content: '⭐';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .asset-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .asset-info .price {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .signal-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .signal-badge.buy {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        
+        .signal-badge.sell {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+        
+        .confluence-bar {
+            margin-bottom: 15px;
+        }
+        
+        .confluence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .confluence-label .text {
+            color: #888;
+        }
+        
+        .confluence-label .value {
+            font-weight: 600;
+        }
+        
+        .confluence-label .value.high { color: #00ff88; }
+        .confluence-label .value.medium { color: #ffd700; }
+        .confluence-label .value.low { color: #888; }
+        
+        .bar-container {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .bar-fill.buy {
+            background: linear-gradient(90deg, #00cc6a, #00ff88);
+        }
+        
+        .bar-fill.sell {
+            background: linear-gradient(90deg, #cc3344, #ff4757);
+        }
+        
+        .indicators-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .indicator-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+        }
+        
+        .indicator-name {
+            font-size: 10px;
+            color: #888;
+            font-weight: 500;
+        }
+        
+        .indicator-btn {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: none;
+        }
+        
+        .indicator-btn.buy {
+            background: #00cc6a;
+            color: #fff;
+        }
+        
+        .indicator-btn.sell {
+            background: #e63946;
+            color: #fff;
+        }
+        
+        .indicator-btn.neutral {
+            background: rgba(255,255,255,0.1);
+            color: #666;
+        }
+        
+        .card-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .detail-item {
+            text-align: center;
+        }
+        
+        .detail-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .detail-item .label {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .time-info {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .chart-link {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 6px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .chart-link:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+        
+        .no-signals {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px dashed rgba(255,255,255,0.1);
+        }
+        
+        .no-signals .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 80px;
+            color: #888;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-container {
+            margin-top: 25px;
+        }
+        
+        .progress-bar {
+            width: 350px;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .confluence-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        
+        .confluence-tag {
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            color: #888;
+        }
+        
+        .confluence-tag.active {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+        }
+        
+        .confluence-tag.active.sell {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff4757;
+        }
+        
+        .history-section {
+            margin-bottom: 30px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .history-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #00d4ff;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .history-table th {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .history-table td {
+            padding: 12px 15px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .history-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .history-table .asset-cell {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .history-table .time-cell {
+            color: #888;
+        }
+        
+        .history-table .signal-cell {
+            text-align: center;
+        }
+        
+        .signal-pill {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .signal-pill.buy {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        
+        .signal-pill.buy-strong {
+            background: #00cc6a;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+        
+        .signal-pill.sell {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+        
+        .signal-pill.sell-strong {
+            background: #e63946;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.4);
+        }
+        
+        .confluence-cell {
+            font-weight: 600;
+        }
+        
+        .confluence-cell.high { color: #00ff88; }
+        .confluence-cell.medium { color: #ffd700; }
+        
+        .new-signal {
+            animation: newSignalPulse 2s ease-out;
+        }
+        
+        @keyframes newSignalPulse {
+            0% { background: rgba(0, 212, 255, 0.3); }
+            100% { background: transparent; }
+        }
+        
+        @media (max-width: 768px) {
+            .header-stats {
+                display: none;
+            }
+            
+            .info-bar .left {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .signals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-table th,
+            .history-table td {
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+        }
+
+        /* ==========================================
+           MÓDULO DE AUDITORIA - Signal Audit Logger
+           ========================================== */
+        .audit-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px 18px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .audit-bar .audit-label {
+            font-size: 12px;
+            color: #ffd700;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 8px;
+        }
+
+        .audit-counter {
+            font-size: 12px;
+            color: #aaa;
+            margin-left: auto;
+        }
+
+        .audit-counter span {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .btn-audit {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-audit.export {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-audit.export:hover {
+            background: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-audit.clear {
+            background: rgba(255, 71, 87, 0.12);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.35);
+        }
+
+        .btn-audit.clear:hover {
+            background: rgba(255, 71, 87, 0.28);
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.25);
+        }
+
+        .btn-audit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">IBX</div>
+                <div>
+                    <h1>IBX Command Center</h1>
+                    <p>Master Elite - Confluência Inteligente</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="value buy" id="buyCount">0</div>
+                    <div class="label">Sinais Compra</div>
+                </div>
+                <div class="header-stat">
+                    <div class="value sell" id="sellCount">0</div>
+                    <div class="label">Sinais Venda</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="info-bar">
+            <div class="left">
+                <div class="info-item">
+                    <span class="icon">📊</span>
+                    <span class="text"><strong id="totalAssets">0</strong> ativos analisados</span>
+                </div>
+                <div class="info-item">
+                    <span class="icon">🎯</span>
+                    <span class="text">Confluência mínima: 
+                        <select id="confluenceSelect" onchange="changeConfluence(this.value)" style="background: #1a1a2e; color: #00d4ff; border: 1px solid #00d4ff; border-radius: 4px; padding: 2px 8px; font-weight: bold; cursor: pointer;">
+                            <option value="40">40%</option>
+                            <option value="50">50%</option>
+                            <option value="60" selected>60%</option>
+                            <option value="70">70%</option>
+                            <option value="80">80%</option>
+                            <option value="90">90%</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="icon">⏱️</span>
+                    <span class="text">Timeframe: 
+                        <select id="timeframeSelect" onchange="changeTimeframe(this.value)" style="background: #1a1a2e; color: #ffd700; border: 1px solid #ffd700; border-radius: 4px; padding: 2px 8px; font-weight: bold; cursor: pointer;">
+                            <option value="4h" selected>4 horas ⭐</option>
+                            <option value="1h">1 hora</option>
+                            <option value="15m">15 minutos</option>
+                        </select>
+                    </span>
+                </div>
+            </div>
+            <div class="update-indicator">
+                <div class="dot"></div>
+                <span>Atualizado: <strong id="lastUpdate">--:--</strong></span>
+            </div>
+        </div>
+        
+        <!-- BARRA DE AUDITORIA + FILTRO ELITE -->
+        <div class="audit-bar">
+            <div class="audit-label">
+                <span>🔬</span> Signal Audit Logger
+            </div>
+            <button class="btn-audit export" onclick="exportSignalAuditCSV()" title="Baixar CSV completo com todos os resultados">
+                📥 Exportar CSV
+            </button>
+            <button class="btn-audit clear" onclick="clearSignalAuditLog()" title="Limpar histórico de auditoria">
+                🗑️ Limpar Log
+            </button>
+            <button id="btnEliteToggle" class="btn-audit" onclick="toggleEliteFilter()"
+                style="background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.5);"
+                title="Filtro elite: Trending + Iceberg + conf>=65 + sem Whale">
+                ⭐ Elite ON
+            </button>
+            <button class="btn-audit" onclick="runHistoricalBacktest()" 
+                style="background:rgba(138,43,226,0.15);color:#9b59b6;border:1px solid rgba(138,43,226,0.4);"
+                title="Rodar backtest com histórico da Binance (500 candles)">
+                🕐 Backtest Histórico
+            </button>
+            <div class="audit-counter">
+                Registros: <span id="auditCount">0</span> / 1000
+                <span id="auditStats" style="font-size:12px; color:#aaa;"></span>
+            </div>
+        </div>
+
+        <div id="content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <h3>Analisando o Mercado</h3>
+                <p>Processando todos os indicadores e calculando confluências...</p>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Iniciando análise...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÕES DO SISTEMA
+        // ==========================================
+        const CONFIG = {
+            minConfluence: 60,           // Confluência mínima para mostrar sinal (%)
+            updateInterval: 300000,      // Atualização a cada 5 minutos (4h não muda a cada 30s)
+            klineLimit: 200,             // Candles para calcular indicadores
+            batchSize: 8,                // Processar 8 ativos por vez
+            maxHistoryItems: 10,         // Máximo de itens no histórico
+            eliteFilterEnabled: true,    // Filtro de alta precisão (backtest 488 sinais)
+            eliteMinConfluence: 65,      // Confluência mínima no modo elite
+            tpMultiplier: 3.0,           // TP 3:1 — backtest 4h: TP 0.90% / SL 0.30% = melhor EV
+            slMultiplier: 1.0,           // SL 1.0x ATR (ratio TP/SL = 3:1)
+            mainTimeframe: '4h',         // Timeframe principal de análise
+            mainTimeframeLabel: '4 horas',
+        };
+
+        // ── Troca de timeframe em tempo real ─────────────────────────
+        function changeTimeframe(val) {
+            CONFIG.mainTimeframe = val;
+            const labels = { '4h': '4 horas', '1h': '1 hora', '15m': '15 minutos' };
+            CONFIG.mainTimeframeLabel = labels[val] || val;
+            // Reiniciar análise com novo timeframe
+            if (typeof startAnalysis === 'function') startAnalysis();
+        }
+
+        // ── Filtro Elite: baseado em backtest real ────────────────────
+        // VENDA Trending+Iceberg+conf>=65+semWhale = 62% 1h / 72% 4h
+        // COMPRA Trending+Iceberg+conf>=65+semWhale = 50% 1h
+        function passesEliteFilter(asset) {
+            if (!CONFIG.eliteFilterEnabled) return true;
+            if (asset.signal === 'NEUTRO') return false;
+            if (asset.regime !== 'trending') return false;
+            if (asset.confluence < CONFIG.eliteMinConfluence) return false;
+            const inds = Object.values(asset.indicators || {});
+            const dirInds = inds.filter(i => asset.signal === 'COMPRA' ? i.buy : i.sell).map(i => i.name);
+            if (!dirInds.includes('Iceberg')) return false;
+            if (dirInds.includes('Whale')) return false;
+            return true;
+        }
+        
+        // Histórico global de sinais
+        let signalHistory = [];
+        let previousSignals = new Map(); // Para detectar novos sinais
+
+        // ==========================================
+        // MÓDULO DE AUDITORIA - Signal Audit Logger
+        // ==========================================
+        const AUDIT_KEY = 'ibx_signal_audit_log';
+        const AUDIT_MAX = 1000;
+        // Controle anti-duplicidade: guarda último timestamp por symbol+signal
+        const _auditLastSeen = new Map();
+
+        // Lista dos ativos
+        const SYMBOLS = [
+            "BTCUSDT", "ETHUSDT", "BCHUSDT", "XRPUSDT", "LTCUSDT", "TRXUSDT", "ETCUSDT", "LINKUSDT", "XLMUSDT", "ADAUSDT",
+            "XMRUSDT", "DASHUSDT", "ZECUSDT", "XTZUSDT", "BNBUSDT", "ATOMUSDT", "ONTUSDT", "IOTAUSDT", "BATUSDT", "VETUSDT",
+            "NEOUSDT", "QTUMUSDT", "IOSTUSDT", "THETAUSDT", "ALGOUSDT", "ZILUSDT", "KNCUSDT", "ZRXUSDT", "COMPUSDT", "OMGUSDT",
+            "DOGEUSDT", "SXPUSDT", "KAVAUSDT", "BANDUSDT", "RLCUSDT", "WAVESUSDT", "MKRUSDT", "SNXUSDT", "DOTUSDT", "DEFIUSDT",
+            "YFIUSDT", "BALUSDT", "CRVUSDT", "TRBUSDT", "RUNEUSDT", "SUSHIUSDT", "EGLDUSDT", "SOLUSDT", "ICXUSDT", "STORJUSDT",
+            "BLZUSDT", "UNIUSDT", "AVAXUSDT", "FTMUSDT", "ENJUSDT", "FLMUSDT", "RENUSDT", "KSMUSDT", "NEARUSDT", "AAVEUSDT",
+            "FILUSDT", "RSRUSDT", "LRCUSDT", "OCEANUSDT", "BELUSDT", "AXSUSDT", "ALPHAUSDT", "ZENUSDT", "SKLUSDT", "GRTUSDT",
+            "1INCHUSDT", "CHZUSDT", "SANDUSDT", "ANKRUSDT", "UNFIUSDT", "REEFUSDT", "RVNUSDT", "SFPUSDT", "XEMUSDT", "BTCSTUSDT",
+            "COTIUSDT", "CHRUSDT", "MANAUSDT", "ALICEUSDT", "HBARUSDT", "ONEUSDT", "LINAUSDT", "STMXUSDT", "DENTUSDT", "CELRUSDT",
+            "HOTUSDT", "MTLUSDT", "OGNUSDT", "NKNUSDT", "SCUSDT", "DGBUSDT", "1000SHIBUSDT", "BAKEUSDT", "GTCUSDT", "BTCDOMUSDT",
+            "IOTXUSDT", "RAYUSDT", "C98USDT", "MASKUSDT", "ATAUSDT", "DYDXUSDT", "1000XECUSDT", "GALAUSDT", "CELOUSDT", "ARUSDT",
+            "KLAYUSDT", "ARPAUSDT", "CTSIUSDT", "LPTUSDT", "ENSUSDT", "PEOPLEUSDT", "ROSEUSDT", "DUSKUSDT", "FLOWUSDT", "IMXUSDT",
+            "API3USDT", "GMTUSDT", "APEUSDT", "WOOUSDT", "FTTUSDT", "JASMYUSDT", "DARUSDT", "OPUSDT", "INJUSDT", "STGUSDT",
+            "SPELLUSDT", "1000LUNCUSDT", "LUNA2USDT", "LDOUSDT", "ICPUSDT", "APTUSDT", "QNTUSDT", "FETUSDT", "FXSUSDT", "HOOKUSDT",
+            "MAGICUSDT", "TUSDT", "HIGHUSDT", "MINAUSDT", "ASTRUSDT", "AGIXUSDT", "PHBUSDT", "GMXUSDT", "CFXUSDT", "STXUSDT",
+            "BNXUSDT", "ACHUSDT", "SSVUSDT", "CKBUSDT", "PERPUSDT", "TRUUSDT", "LQTYUSDT", "USDCUSDT", "IDUSDT", "ARBUSDT",
+            "JOEUSDT", "TLMUSDT", "AMBUSDT", "LEVERUSDT", "RDNTUSDT", "HFTUSDT", "XVSUSDT", "BLURUSDT", "EDUUSDT", "IDEXUSDT",
+            "SUIUSDT", "1000PEPEUSDT", "1000FLOKIUSDT", "UMAUSDT", "RADUSDT", "KEYUSDT", "COMBOUSDT", "NMRUSDT", "MAVUSDT", "MDTUSDT",
+            "XVGUSDT", "WLDUSDT", "PENDLEUSDT", "ARKMUSDT", "AGLDUSDT", "YGGUSDT", "DODOXUSDT", "BNTUSDT", "OXTUSDT", "SEIUSDT",
+            "CYBERUSDT", "HIFIUSDT", "ARKUSDT", "GLMRUSDT", "BICOUSDT", "STRAXUSDT", "LOOMUSDT", "BIGTIMEUSDT", "BONDUSDT", "ORBSUSDT",
+            "STPTUSDT", "WAXPUSDT", "BSVUSDT", "RIFUSDT", "POLYXUSDT", "GASUSDT", "POWRUSDT", "TIAUSDT", "SNTUSDT", "CAKEUSDT",
+            "MEMEUSDT", "TWTUSDT", "TOKENUSDT", "ORDIUSDT", "STEEMUSDT", "BADGERUSDT", "ILVUSDT", "NTRNUSDT", "KASUSDT", "BEAMXUSDT",
+            "1000BONKUSDT", "PYTHUSDT", "SUPERUSDT", "USTCUSDT", "ONGUSDT", "ETHWUSDT", "JTOUSDT", "1000SATSUSDT", "AUCTIONUSDT", "1000RATSUSDT",
+            "ACEUSDT", "MOVRUSDT", "NFPUSDT", "AIUSDT", "XAIUSDT", "WIFUSDT", "MANTAUSDT", "ONDOUSDT", "LSKUSDT", "ALTUSDT",
+            "JUPUSDT", "ZETAUSDT", "RONINUSDT", "DYMUSDT", "OMUSDT", "PIXELUSDT", "STRKUSDT", "GLMUSDT", "PORTALUSDT", "TONUSDT",
+            "AXLUSDT", "MYROUSDT", "METISUSDT", "AEVOUSDT", "VANRYUSDT", "BOMEUSDT", "ETHFIUSDT", "ENAUSDT", "WUSDT", "TNSRUSDT",
+            "SAGAUSDT", "TAOUSDT", "OMNIUSDT", "REZUSDT", "BBUSDT", "NOTUSDT", "TURBOUSDT", "IOUSDT", "ZKUSDT", "MEWUSDT",
+            "LISTAUSDT", "ZROUSDT", "RENDERUSDT", "BANANAUSDT", "RAREUSDT", "GUSDT", "SYNUSDT", "SYSUSDT", "VOXELUSDT", "BRETTUSDT",
+            "ALPACAUSDT", "POPCATUSDT", "SUNUSDT", "VIDTUSDT", "NULSUSDT", "DOGSUSDT", "MBOXUSDT", "CHESSUSDT", "FLUXUSDT", "BSWUSDT",
+            "QUICKUSDT", "NEIROETHUSDT", "RPLUSDT", "POLUSDT", "UXLINKUSDT", "1MBABYDOGEUSDT", "NEIROUSDT", "KDAUSDT", "FIDAUSDT", "FIOUSDT",
+            "CATIUSDT", "GHSTUSDT", "LOKAUSDT", "HMSTRUSDT", "REIUSDT", "COSUSDT", "EIGENUSDT", "DIAUSDT", "1000CATUSDT", "SCRUSDT",
+            "GOATUSDT", "MOODENGUSDT", "SAFEUSDT", "SANTOSUSDT", "TROYUSDT", "PONKEUSDT", "COWUSDT", "CETUSUSDT", "1000000MOGUSDT", "GRASSUSDT",
+            "DRIFTUSDT", "SWELLUSDT", "ACTUSDT", "PNUTUSDT", "HIPPOUSDT", "1000XUSDT", "DEGENUSDT", "BANUSDT", "AKTUSDT", "SLERFUSDT",
+            "SCRTUSDT", "1000CHEEMSUSDT", "1000WHYUSDT", "THEUSDT", "MORPHOUSDT", "CHILLGUYUSDT", "KAIAUSDT", "AEROUSDT", "ACXUSDT", "ORCAUSDT",
+            "MOVEUSDT", "RAYSOLUSDT", "KOMAUSDT", "VIRTUALUSDT", "SPXUSDT", "MEUSDT", "AVAUSDT", "DEGOUSDT", "VELODROMEUSDT", "MOCAUSDT",
+            "VANAUSDT", "PENGUUSDT", "LUMIAUSDT", "USUALUSDT", "AIXBTUSDT", "FARTCOINUSDT", "KMNOUSDT", "CGPTUSDT", "HIVEUSDT", "DEXEUSDT",
+            "PHAUSDT", "DFUSDT", "GRIFFAINUSDT", "AI16ZUSDT", "ZEREBROUSDT", "BIOUSDT", "COOKIEUSDT", "ALCHUSDT", "SWARMSUSDT", "SONICUSDT",
+            "DUSDT", "PROMUSDT", "SUSDT", "SOLVUSDT", "ARCUSDT", "AVAAIUSDT", "TRUMPUSDT", "MELANIAUSDT", "VTHOUSDT", "ANIMEUSDT",
+            "VINEUSDT", "PIPPINUSDT", "VVVUSDT", "BERAUSDT", "TSTUSDT", "LAYERUSDT", "HEIUSDT", "B3USDT", "IPUSDT", "GPSUSDT",
+            "SHELLUSDT", "KAITOUSDT", "REDUSDT", "VICUSDT", "EPICUSDT", "BMTUSDT", "MUBARAKUSDT", "FORMUSDT", "BIDUSDT", "TUTUSDT",
+            "BROCCOLI714USDT", "BROCCOLIF3BUSDT", "SIRENUSDT", "BANANAS31USDT", "BRUSDT", "PLUMEUSDT", "NILUSDT", "PARTIUSDT", "JELLYJELLYUSDT", "MAVIAUSDT",
+            "PAXGUSDT", "WALUSDT", "FUNUSDT", "MLNUSDT", "GUNUSDT", "ATHUSDT", "BABYUSDT", "FORTHUSDT", "PROMPTUSDT", "XCNUSDT"
+        ];
+
+        // ==========================================
+        // FUNÇÕES DE CÁLCULO DE INDICADORES
+        // ==========================================
+        
+        function calculateEMA(data, period) {
+            const k = 2 / (period + 1);
+            let ema = [data[0]];
+            for (let i = 1; i < data.length; i++) {
+                ema.push(data[i] * k + ema[i - 1] * (1 - k));
+            }
+            return ema;
+        }
+        
+        function calculateSMA(data, period) {
+            let sma = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    sma.push(null);
+                } else {
+                    let sum = 0;
+                    for (let j = 0; j < period; j++) {
+                        sum += data[i - j];
+                    }
+                    sma.push(sum / period);
+                }
+            }
+            return sma;
+        }
+        
+        function calculateRSI(closes, period = 14) {
+            let gains = [], losses = [];
+            for (let i = 1; i < closes.length; i++) {
+                const change = closes[i] - closes[i - 1];
+                gains.push(change > 0 ? change : 0);
+                losses.push(change < 0 ? Math.abs(change) : 0);
+            }
+            
+            let rsi = [];
+            let avgGain = 0, avgLoss = 0;
+            
+            for (let i = 0; i < gains.length; i++) {
+                if (i < period - 1) {
+                    rsi.push(50);
+                } else if (i === period - 1) {
+                    for (let j = 0; j < period; j++) {
+                        avgGain += gains[i - j];
+                        avgLoss += losses[i - j];
+                    }
+                    avgGain /= period;
+                    avgLoss /= period;
+                    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                    rsi.push(100 - (100 / (1 + rs)));
+                } else {
+                    avgGain = (avgGain * (period - 1) + gains[i]) / period;
+                    avgLoss = (avgLoss * (period - 1) + losses[i]) / period;
+                    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                    rsi.push(100 - (100 / (1 + rs)));
+                }
+            }
+            return rsi;
+        }
+        
+        function calculateMACD(closes, fast = 12, slow = 26, signal = 9) {
+            const emaFast = calculateEMA(closes, fast);
+            const emaSlow = calculateEMA(closes, slow);
+            let macdLine = emaFast.map((v, i) => v - emaSlow[i]);
+            const signalLine = calculateEMA(macdLine, signal);
+            return { macdLine, signalLine };
+        }
+        
+        function calculateATR(highs, lows, closes, period = 14) {
+            let tr = [];
+            for (let i = 0; i < highs.length; i++) {
+                if (i === 0) tr.push(highs[i] - lows[i]);
+                else {
+                    const hl = highs[i] - lows[i];
+                    const hc = Math.abs(highs[i] - closes[i - 1]);
+                    const lc = Math.abs(lows[i] - closes[i - 1]);
+                    tr.push(Math.max(hl, hc, lc));
+                }
+            }
+            return calculateEMA(tr, period);
+        }
+        
+        function calculateBB(closes, period = 20, stdDev = 2) {
+            const sma = calculateSMA(closes, period);
+            let upper = [], lower = [];
+            for (let i = 0; i < closes.length; i++) {
+                if (i < period - 1 || sma[i] === null) {
+                    upper.push(null);
+                    lower.push(null);
+                } else {
+                    let sum = 0;
+                    for (let j = 0; j < period; j++) {
+                        sum += Math.pow(closes[i - j] - sma[i], 2);
+                    }
+                    const std = Math.sqrt(sum / period);
+                    upper.push(sma[i] + stdDev * std);
+                    lower.push(sma[i] - stdDev * std);
+                }
+            }
+            return { middle: sma, upper, lower };
+        }
+        
+        function calculateHighest(data, period) {
+            let result = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period) result.push(null);
+                else {
+                    let max = data[i - period];
+                    for (let j = i - period; j < i; j++) {
+                        if (data[j] > max) max = data[j];
+                    }
+                    result.push(max);
+                }
+            }
+            return result;
+        }
+        
+        function calculateLowest(data, period) {
+            let result = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period) result.push(null);
+                else {
+                    let min = data[i - period];
+                    for (let j = i - period; j < i; j++) {
+                        if (data[j] < min) min = data[j];
+                    }
+                    result.push(min);
+                }
+            }
+            return result;
+        }
+        
+        function calculateKalman(data, sharpness = 1.0) {
+            let kalman = [];
+            let k_val = data[0];
+            let p_val = 1.0;
+            const q_val = 0.0001 * sharpness;
+            const r_val = 0.01;
+            
+            for (let i = 0; i < data.length; i++) {
+                p_val = p_val + q_val;
+                const gain = p_val / (p_val + r_val);
+                k_val = k_val + gain * (data[i] - k_val);
+                p_val = (1 - gain) * p_val;
+                kalman.push(k_val);
+            }
+            return kalman;
+        }
+        
+        function calculateHurst(closes, period = 100) {
+            const idx = closes.length - 1;
+            if (idx < period + 1) return 0.5;
+            
+            let logReturns = [];
+            for (let i = idx - period; i <= idx; i++) {
+                if (closes[i - 1] > 0) {
+                    logReturns.push(Math.log(closes[i] / closes[i - 1]));
+                }
+            }
+            
+            if (logReturns.length < 10) return 0.5;
+            
+            const mean = logReturns.reduce((a, b) => a + b, 0) / logReturns.length;
+            let cumDev = [];
+            let sum = 0;
+            for (let i = 0; i < logReturns.length; i++) {
+                sum += logReturns[i] - mean;
+                cumDev.push(sum);
+            }
+            
+            const range = Math.max(...cumDev) - Math.min(...cumDev);
+            const variance = logReturns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / logReturns.length;
+            const stdDev = Math.sqrt(variance);
+            
+            if (stdDev === 0) return 0.5;
+            
+            const rs = range / stdDev;
+            const hurst = Math.log(rs) / Math.log(logReturns.length);
+            
+            return Math.max(0, Math.min(1, hurst));
+        }
+        
+        function calculateOrderFlow(close, open, volume, threshold = 2.5) {
+            const buyVol = volume * (close > open ? 1.0 : 0.45);
+            const sellVol = volume * (close < open ? 1.0 : 0.45);
+            const imbalance = buyVol / Math.max(sellVol, 1.0);
+            return Math.log(imbalance) / Math.log(threshold);
+        }
+        
+        function calculateIceberg(volume, volAvg, atr, priceMove) {
+            if (priceMove === 0) priceMove = 0.000001;
+            const intensity = (volume / Math.max(volAvg, 1.0)) * (atr / Math.max(priceMove, 0.000001));
+            return Math.min(intensity / 10.0, 1.0);
+        }
+
+        // ==========================================
+        // SISTEMA DE CONFLUÊNCIA INTELIGENTE
+        // ==========================================
+        
+        function analyzeAsset(klines, marketData = {}) {
+            const closes = klines.map(k => parseFloat(k[4]));
+            const highs = klines.map(k => parseFloat(k[2]));
+            const lows = klines.map(k => parseFloat(k[3]));
+            const opens = klines.map(k => parseFloat(k[1]));
+            const volumes = klines.map(k => parseFloat(k[5]));
+            
+            const idx = closes.length - 1;
+            const close = closes[idx];
+            const open = opens[idx];
+            const high = highs[idx];
+            const low = lows[idx];
+            const volume = volumes[idx];
+            
+            // Indicadores Base
+            const ema8 = calculateEMA(closes, 8);
+            const ema20 = calculateEMA(closes, 20);
+            const ema21 = calculateEMA(closes, 21);
+            const ema50 = calculateEMA(closes, 50);
+            const ema200 = calculateEMA(closes, 200);
+            const rsi = calculateRSI(closes, 14);
+            const macd = calculateMACD(closes, 12, 26, 9);
+            const atr = calculateATR(highs, lows, closes, 14);
+            const bb = calculateBB(closes, 20, 2);
+            const volSMA = calculateSMA(volumes, 20);
+            const kalman = calculateKalman(closes, 1.0);
+            const highestHigh = calculateHighest(highs, 20);
+            const lowestLow = calculateLowest(lows, 20);
+            
+            const rsiValue = rsi[idx - 1] || 50;
+            const macdLine = macd.macdLine[idx];
+            const signalLine = macd.signalLine[idx];
+            const atrValue = atr[idx];
+            const kalmanPrice = kalman[idx];
+            const hurstValue = calculateHurst(closes, 100);
+            
+            // Squeeze Detection
+            const kcUpper = ema20[idx] + (atrValue * 1.5);
+            const kcLower = ema20[idx] - (atrValue * 1.5);
+            const isSqueezing = bb.lower[idx] > kcLower && bb.upper[idx] < kcUpper;
+            
+            // Order Flow & Iceberg
+            const orderFlow = calculateOrderFlow(close, open, volume, 2.5);
+            const priceMove = Math.abs(close - open);
+            const icebergIntensity = calculateIceberg(volume, volSMA[idx], atrValue, priceMove);
+            
+            // Break of Structure
+            const bullishBOS = close > highestHigh[idx - 1];
+            const bearishBOS = close < lowestLow[idx - 1];
+            
+            // Order Blocks
+            const highVolume = volume > volSMA[idx] * 1.2;
+            const bullishOB = close > open && closes[idx - 1] < opens[idx - 1] && highVolume && low < lows[idx - 1];
+            const bearishOB = close < open && closes[idx - 1] > opens[idx - 1] && highVolume && high > highs[idx - 1];
+            
+            // Whale Activity
+            const whaleThreshold = volSMA[idx] * 2;
+            const isWhaleBuy = volume > whaleThreshold && close > open;
+            const isWhaleSell = volume > whaleThreshold && close < open;
+            
+            // ==========================================
+            // CÁLCULO DE CONFLUÊNCIA (0-100%)
+            // ==========================================
+            
+            let buyPoints = 0;
+            let sellPoints = 0;
+            let totalPoints = 0;
+            
+            const indicators = {
+                // Tendência EMAs (peso: 15)
+                ema_trend: { weight: 15, buy: false, sell: false, name: 'EMAs' },
+                // RSI (peso: 12)
+                rsi: { weight: 12, buy: false, sell: false, name: 'RSI' },
+                // MACD (peso: 12)
+                macd: { weight: 12, buy: false, sell: false, name: 'MACD' },
+                // Kalman Filter (peso: 10)
+                kalman: { weight: 10, buy: false, sell: false, name: 'Kalman' },
+                // Hurst (peso: 8)
+                hurst: { weight: 8, buy: false, sell: false, name: 'Hurst' },
+                // Order Flow (peso: 12)
+                orderFlow: { weight: 12, buy: false, sell: false, name: 'Order Flow' },
+                // Iceberg (peso: 8)
+                iceberg: { weight: 8, buy: false, sell: false, name: 'Iceberg' },
+                // BOS (peso: 10)
+                bos: { weight: 10, buy: false, sell: false, name: 'BOS' },
+                // Order Block (peso: 8)
+                orderBlock: { weight: 8, buy: false, sell: false, name: 'Order Block' },
+                // Whale (peso: 5)
+                whale: { weight: 5, buy: false, sell: false, name: 'Whale' },
+                // ── Indicadores de Futuros ──
+                // Funding Rate (peso: 10)
+                funding:   { weight: 10, buy: false, sell: false, name: 'Funding' },
+                // Open Interest (peso: 8)
+                openInt:   { weight: 8,  buy: false, sell: false, name: 'Open Interest' },
+                // Long/Short Ratio (peso: 10)
+                longShort: { weight: 10, buy: false, sell: false, name: 'Long/Short' },
+                // Taker Ratio (peso: 10)
+                taker:     { weight: 10, buy: false, sell: false, name: 'Taker Ratio' },
+            };
+            
+            // 1. Tendência EMAs
+            if (close > ema8[idx] && ema8[idx] > ema21[idx] && close > ema200[idx]) {
+                indicators.ema_trend.buy = true;
+            } else if (close < ema8[idx] && ema8[idx] < ema21[idx] && close < ema200[idx]) {
+                indicators.ema_trend.sell = true;
+            }
+            
+            // 2. RSI
+            if (rsiValue < 35 || (rsiValue < 50 && rsiValue > rsi[idx - 2])) {
+                indicators.rsi.buy = true;
+            } else if (rsiValue > 65 || (rsiValue > 50 && rsiValue < rsi[idx - 2])) {
+                indicators.rsi.sell = true;
+            }
+            
+            // 3. MACD
+            if (macdLine > signalLine && macd.macdLine[idx - 1] <= macd.signalLine[idx - 1]) {
+                indicators.macd.buy = true;
+            } else if (macdLine < signalLine && macd.macdLine[idx - 1] >= macd.signalLine[idx - 1]) {
+                indicators.macd.sell = true;
+            } else if (macdLine > signalLine) {
+                indicators.macd.buy = true;
+            } else if (macdLine < signalLine) {
+                indicators.macd.sell = true;
+            }
+            
+            // 4. Kalman Filter
+            if (close > kalmanPrice && closes[idx - 1] <= kalman[idx - 1]) {
+                indicators.kalman.buy = true;
+            } else if (close < kalmanPrice && closes[idx - 1] >= kalman[idx - 1]) {
+                indicators.kalman.sell = true;
+            } else if (close > kalmanPrice) {
+                indicators.kalman.buy = true;
+            } else if (close < kalmanPrice) {
+                indicators.kalman.sell = true;
+            }
+            
+            // 5. Hurst (Regime de Mercado)
+            if (hurstValue > 0.55 && close > ema20[idx]) {
+                indicators.hurst.buy = true;
+            } else if (hurstValue > 0.55 && close < ema20[idx]) {
+                indicators.hurst.sell = true;
+            }
+            
+            // 6. Order Flow
+            if (orderFlow > 0.5) {
+                indicators.orderFlow.buy = true;
+            } else if (orderFlow < -0.5) {
+                indicators.orderFlow.sell = true;
+            }
+            
+            // 7. Iceberg
+            if (icebergIntensity > 0.4 && close > open) {
+                indicators.iceberg.buy = true;
+            } else if (icebergIntensity > 0.4 && close < open) {
+                indicators.iceberg.sell = true;
+            }
+            
+            // 8. Break of Structure
+            if (bullishBOS) {
+                indicators.bos.buy = true;
+            } else if (bearishBOS) {
+                indicators.bos.sell = true;
+            }
+            
+            // 9. Order Block
+            if (bullishOB) {
+                indicators.orderBlock.buy = true;
+            } else if (bearishOB) {
+                indicators.orderBlock.sell = true;
+            }
+            
+            // 10. Whale Activity
+            if (isWhaleBuy) {
+                indicators.whale.buy = true;
+            } else if (isWhaleSell) {
+                indicators.whale.sell = true;
+            }
+            
+            // ── Indicadores de Futuros ──────────────────────────────
+            // Funding Rate: negativo = short pagando long = viés compra
+            if (marketData.fundingRate !== undefined) {
+                const fr = parseFloat(marketData.fundingRate);
+                if (fr < -0.0002) indicators.funding.buy  = true; // muito negativo = compra
+                else if (fr > 0.0002) indicators.funding.sell = true; // muito positivo = venda
+            }
+
+            // Open Interest: aumento com preço subindo = tendência bull; caindo = bear
+            if (marketData.oiChange !== undefined) {
+                if (marketData.oiChange > 0.01 && close > open)  indicators.openInt.buy  = true;
+                if (marketData.oiChange > 0.01 && close < open)  indicators.openInt.sell = true;
+            }
+
+            // Long/Short Ratio: >2 extremo long = contrário = venda; <0.5 extremo short = compra
+            if (marketData.lsRatio !== undefined) {
+                const ls = parseFloat(marketData.lsRatio);
+                if (ls < 0.7)  indicators.longShort.buy  = true; // maioria short = compra
+                if (ls > 1.5)  indicators.longShort.sell = true; // maioria long = venda
+            }
+
+            // Taker Buy/Sell Ratio: >1 = mais compras agressivas
+            if (marketData.takerRatio !== undefined) {
+                const tr = parseFloat(marketData.takerRatio);
+                if (tr > 1.15) indicators.taker.buy  = true;
+                if (tr < 0.85) indicators.taker.sell = true;
+            }
+
+            // Calcular pontuação
+            for (const key in indicators) {
+                const ind = indicators[key];
+                totalPoints += ind.weight;
+                if (ind.buy) buyPoints += ind.weight;
+                if (ind.sell) sellPoints += ind.weight;
+            }
+            
+            const buyConfluence = (buyPoints / totalPoints) * 100;
+            const sellConfluence = (sellPoints / totalPoints) * 100;
+            
+            // Determinar sinal (sem filtro de confluência aqui - filtro é aplicado depois)
+            let signal = 'NEUTRO';
+            let confluence = 0;
+            let activeIndicators = [];
+            
+            // Gerar sinal baseado na maior confluência (sem squeeze)
+            if (!isSqueezing) {
+                if (buyConfluence > sellConfluence && buyConfluence > 0) {
+                    signal = 'COMPRA';
+                    confluence = buyConfluence;
+                    for (const key in indicators) {
+                        if (indicators[key].buy) activeIndicators.push(indicators[key].name);
+                    }
+                } else if (sellConfluence > buyConfluence && sellConfluence > 0) {
+                    signal = 'VENDA';
+                    confluence = sellConfluence;
+                    for (const key in indicators) {
+                        if (indicators[key].sell) activeIndicators.push(indicators[key].name);
+                    }
+                }
+            }
+            
+            return {
+                price: close,
+                signal: signal,
+                confluence: confluence,
+                buyConfluence: buyConfluence,
+                sellConfluence: sellConfluence,
+                activeIndicators: activeIndicators,
+                indicators: indicators,
+                regime: isSqueezing ? 'squeeze' : hurstValue > 0.55 ? 'trending' : hurstValue < 0.45 ? 'reverting' : 'lateral',
+                rsi: rsiValue,
+                volume: volume,
+                volumeRatio: volume / volSMA[idx],
+                isStrong: confluence >= 90,
+                atr: atrValue,
+                fundingRate: marketData.fundingRate,
+                openInterest: marketData.openInterest,
+                lsRatio: marketData.lsRatio,
+                takerRatio: marketData.takerRatio,
+            };
+        }
+
+        // ==========================================
+        // BUSCAR DADOS DA BINANCE
+        // ==========================================
+
+        // Cache de dados de mercado (funding/OI/LS/Taker) — atualizado a cada ciclo
+        const _marketDataCache = {};
+        let _marketDataTs = 0;
+
+        async function fetchMarketData(symbol) {
+            // Reutilizar cache por 3 minutos
+            const cacheKey = symbol;
+            const now = Date.now();
+            if (_marketDataCache[cacheKey] && now - _marketDataTs < 180000) {
+                return _marketDataCache[cacheKey];
+            }
+            const base = 'https://fapi.binance.com';
+            const data = {};
+            try {
+                const [frRes, oiRes, lsRes, tkRes] = await Promise.allSettled([
+                    fetch(`${base}/fapi/v1/fundingRate?symbol=${symbol}&limit=2`),
+                    fetch(`${base}/fapi/v1/openInterest?symbol=${symbol}`),
+                    fetch(`${base}/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m&limit=2`),
+                    fetch(`${base}/futures/data/takerlongshortRatio?symbol=${symbol}&period=5m&limit=1`),
+                ]);
+
+                // Funding Rate
+                if (frRes.status === 'fulfilled' && frRes.value.ok) {
+                    const fr = await frRes.value.json();
+                    if (fr && fr.length > 0) data.fundingRate = parseFloat(fr[fr.length-1].fundingRate);
+                }
+                // Open Interest — variação relativa
+                if (oiRes.status === 'fulfilled' && oiRes.value.ok) {
+                    const oi = await oiRes.value.json();
+                    data.openInterest = parseFloat(oi.openInterest || 0);
+                    // Guardar para calcular variação na próxima chamada
+                    if (_marketDataCache[cacheKey] && _marketDataCache[cacheKey].openInterest) {
+                        data.oiChange = (data.openInterest - _marketDataCache[cacheKey].openInterest)
+                                        / _marketDataCache[cacheKey].openInterest;
+                    } else {
+                        data.oiChange = 0;
+                    }
+                }
+                // Long/Short Ratio
+                if (lsRes.status === 'fulfilled' && lsRes.value.ok) {
+                    const ls = await lsRes.value.json();
+                    if (ls && ls.length > 0) data.lsRatio = parseFloat(ls[ls.length-1].longShortRatio);
+                }
+                // Taker Buy/Sell Ratio
+                if (tkRes.status === 'fulfilled' && tkRes.value.ok) {
+                    const tk = await tkRes.value.json();
+                    if (tk && tk.length > 0) data.takerRatio = parseFloat(tk[0].buySellRatio);
+                }
+            } catch(e) {
+                console.warn(`[IBX] marketData fetch error ${symbol}:`, e);
+            }
+            _marketDataCache[cacheKey] = data;
+            _marketDataTs = now;
+            return data;
+        }
+
+        // ── Motor de Backtesting Histórico ───────────────────────────
+        // Busca até 1000 candles históricos e simula os sinais passados
+        async function runHistoricalBacktest(symbols = ['BTCUSDT','ETHUSDT','SOLUSDT','BNBUSDT','XRPUSDT'],
+                                              interval = '4h', limit = 500) {
+            console.log(`[IBX Backtest] Iniciando: ${symbols.length} ativos, ${interval}, ${limit} candles`);
+            const results = [];
+
+            for (const symbol of symbols) {
+                const klines = await fetchKlines(symbol, interval, limit);
+                if (!klines || klines.length < 200) continue;
+
+                // Deslizar janela de 200 candles por todo o histórico
+                for (let i = 200; i < klines.length - 10; i++) {
+                    const window = klines.slice(i - 200, i);
+                    const analysis = analyzeAsset(window);
+
+                    if (analysis.signal === 'NEUTRO') continue;
+                    if (analysis.confluence < CONFIG.eliteMinConfluence) continue;
+
+                    // Aplicar filtro elite
+                    const fakeAsset = { ...analysis, symbol, regime: analysis.regime };
+                    if (!passesEliteFilter(fakeAsset)) continue;
+
+                    const entryPrice = analysis.price;
+                    const isBuy = analysis.signal === 'COMPRA';
+                    const atr = analysis.atr || entryPrice * 0.003;
+
+                    // Calcular TP e SL baseado no CONFIG
+                    const tp = isBuy ? entryPrice + atr * CONFIG.tpMultiplier
+                                     : entryPrice - atr * CONFIG.tpMultiplier;
+                    const sl = isBuy ? entryPrice - atr * CONFIG.slMultiplier
+                                     : entryPrice + atr * CONFIG.slMultiplier;
+
+                    // Verificar próximos 10 candles (resultado real)
+                    const future = klines.slice(i, i + 10);
+                    let hitTP = false, hitSL = false, firstHit = 'none';
+                    let maxGain = 0, maxLoss = 0;
+
+                    for (const fc of future) {
+                        const fHigh = parseFloat(fc[2]);
+                        const fLow  = parseFloat(fc[3]);
+                        const gain = isBuy ? (fHigh - entryPrice)/entryPrice*100 : (entryPrice - fLow)/entryPrice*100;
+                        const loss = isBuy ? (entryPrice - fLow)/entryPrice*100  : (fHigh - entryPrice)/entryPrice*100;
+                        if (gain > maxGain) maxGain = gain;
+                        if (loss > maxLoss) maxLoss = loss;
+                        if (!hitTP && (isBuy ? fHigh >= tp : fLow <= tp)) {
+                            hitTP = true;
+                            if (firstHit === 'none') firstHit = 'TP';
+                        }
+                        if (!hitSL && (isBuy ? fLow <= sl : fHigh >= sl)) {
+                            hitSL = true;
+                            if (firstHit === 'none') firstHit = 'SL';
+                        }
+                    }
+
+                    results.push({
+                        symbol, signal: analysis.signal, confluence: analysis.confluence,
+                        entryPrice, tp: parseFloat(tp.toFixed(8)), sl: parseFloat(sl.toFixed(8)),
+                        regime: analysis.regime, rsi: analysis.rsi,
+                        hitTP: hitTP ? 1 : 0, hitSL: hitSL ? 1 : 0,
+                        firstHit, maxGainPct: +maxGain.toFixed(4), maxLossPct: +maxLoss.toFixed(4),
+                        timestamp: new Date(klines[i][0]).toISOString(),
+                        interval,
+                    });
+                }
+            }
+
+            // Calcular estatísticas
+            const total  = results.length;
+            const tpFirst = results.filter(r => r.firstHit === 'TP').length;
+            const slFirst = results.filter(r => r.firstHit === 'SL').length;
+            const tpRate  = total > 0 ? (tpFirst / total * 100).toFixed(1) : 0;
+            const avgGain = total > 0 ? (results.reduce((s,r) => s + r.maxGainPct, 0) / total).toFixed(3) : 0;
+            const avgLoss = total > 0 ? (results.reduce((s,r) => s + r.maxLossPct, 0) / total).toFixed(3) : 0;
+
+            console.log(`[IBX Backtest] Concluído: ${total} sinais | TP 1º: ${tpRate}% | Gain médio: ${avgGain}% | Loss médio: ${avgLoss}%`);
+            _showBacktestResult({ total, tpFirst, slFirst, tpRate, avgGain, avgLoss, results, interval });
+            return results;
+        }
+
+        function _showBacktestResult({ total, tpFirst, slFirst, tpRate, avgGain, avgLoss, results, interval }) {
+            const el = document.getElementById('auditStats');
+            if (!el) return;
+            const ev = ((tpFirst/total) * CONFIG.tpMultiplier * 0.3 - (slFirst/total) * 0.3).toFixed(4);
+            el.innerHTML = `
+                &nbsp;|&nbsp; 📊 <strong>Backtest ${interval}</strong>:
+                ${total} sinais &nbsp;|&nbsp;
+                TP 1º: <strong style="color:#00ff88">${tpRate}%</strong> &nbsp;|&nbsp;
+                Gain médio: <strong style="color:#ffd700">${avgGain}%</strong> &nbsp;|&nbsp;
+                Loss médio: <strong style="color:#ff4757">${avgLoss}%</strong> &nbsp;|&nbsp;
+                EV: <strong style="color:${parseFloat(ev)>0?'#00ff88':'#ff4757'}">${parseFloat(ev)>0?'+':''}${ev}%</strong>
+            `;
+        }
+
+        async function fetchKlines(symbol, interval = CONFIG.mainTimeframe, limit = 200) {
+            try {
+                const response = await fetch(
+                    `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
+                );
+                if (!response.ok) return null;
+                return await response.json();
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        async function fetchAllData() {
+            const signals = [];
+            const allAssets = []; // Todos os ativos analisados
+            const totalSymbols = SYMBOLS.length;
+            let processed = 0;
+            
+            for (let i = 0; i < SYMBOLS.length; i += CONFIG.batchSize) {
+                const batch = SYMBOLS.slice(i, i + CONFIG.batchSize);
+                
+                const promises = batch.map(async (symbol) => {
+                    const klines = await fetchKlines(symbol);
+                    if (klines && klines.length >= 100) {
+                        // Buscar dados de futuros para os principais ativos
+                        const MARKET_DATA_SYMBOLS = ['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT','AVAXUSDT'];
+                        const marketData = MARKET_DATA_SYMBOLS.includes(symbol)
+                            ? await fetchMarketData(symbol)
+                            : {};
+                        const analysis = analyzeAsset(klines, marketData);
+                        const assetData = {
+                            symbol: symbol,
+                            timestamp: new Date(),
+                            ...analysis
+                        };
+                        return assetData;
+                    }
+                    return null;
+                });
+                
+                const results = await Promise.all(promises);
+                results.forEach(r => {
+                    if (r) {
+                        allAssets.push(r);
+                        // Filtrar: modo elite ou confluência mínima
+                        if (r.signal !== 'NEUTRO' && r.confluence >= CONFIG.minConfluence) {
+                            if (CONFIG.eliteFilterEnabled) {
+                                if (passesEliteFilter(r)) signals.push(r);
+                            } else {
+                                signals.push(r);
+                            }
+                        }
+                    }
+                });
+                
+                processed += batch.length;
+                updateProgress(processed, totalSymbols);
+                
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            return { signals, allAssets, totalAnalyzed: processed, totalSymbols: SYMBOLS.length };
+        }
+        
+        function updateProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressFill) progressFill.style.width = `${percent}%`;
+            if (progressText) progressText.textContent = `Analisando ${current}/${total} ativos (${percent}%)`;
+        }
+
+        // ==========================================
+        // RENDERIZAÇÃO
+        // ==========================================
+        
+        function renderSignals(data) {
+            lastData = data; // Salvar para uso posterior
+            const { signals, allAssets, totalAnalyzed, totalSymbols } = data;
+            
+            // Refiltrar com confluência atual + filtro elite se ativo
+            const filteredSignals = allAssets.filter(s => {
+                if (s.signal === 'NEUTRO' || s.confluence < CONFIG.minConfluence) return false;
+                if (CONFIG.eliteFilterEnabled) return passesEliteFilter(s);
+                return true;
+            });
+            
+            const buySignals = filteredSignals.filter(s => s.signal === 'COMPRA').sort((a, b) => b.confluence - a.confluence);
+            const sellSignals = filteredSignals.filter(s => s.signal === 'VENDA').sort((a, b) => b.confluence - a.confluence);
+            
+            // Atualizar histórico com novos sinais
+            updateSignalHistory(filteredSignals);
+            
+            document.getElementById('totalAssets').textContent = `${totalAnalyzed}/${totalSymbols}`;
+            document.getElementById('buyCount').textContent = buySignals.length;
+            document.getElementById('sellCount').textContent = sellSignals.length;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+            
+            let html = '';
+            
+            // Seção de Histórico de Sinais
+            html += renderHistorySection();
+            
+            // Seção de Compra
+            html += `
+                <div class="signals-section">
+                    <div class="section-header">
+                        <h2 class="section-title buy">
+                            <span class="icon">📈</span>
+                            Sinais de Compra (${buySignals.length})
+                        </h2>
+                    </div>
+                    <div class="signals-grid">
+            `;
+            
+            if (buySignals.length === 0) {
+                html += `
+                    <div class="no-signals">
+                        <div class="icon">🔍</div>
+                        <p>Nenhum sinal de compra com confluência ≥ ${CONFIG.minConfluence}%</p>
+                    </div>
+                `;
+            } else {
+                buySignals.forEach(s => {
+                    html += renderSignalCard(s);
+                });
+            }
+            
+            html += `</div></div>`;
+            
+            // Seção de Venda
+            html += `
+                <div class="signals-section">
+                    <div class="section-header">
+                        <h2 class="section-title sell">
+                            <span class="icon">📉</span>
+                            Sinais de Venda (${sellSignals.length})
+                        </h2>
+                    </div>
+                    <div class="signals-grid">
+            `;
+            
+            if (sellSignals.length === 0) {
+                html += `
+                    <div class="no-signals">
+                        <div class="icon">🔍</div>
+                        <p>Nenhum sinal de venda com confluência ≥ ${CONFIG.minConfluence}%</p>
+                    </div>
+                `;
+            } else {
+                sellSignals.forEach(s => {
+                    html += renderSignalCard(s);
+                });
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('content').innerHTML = html;
+        }
+        
+        function renderSignalCard(s) {
+            const signalClass = s.signal === 'COMPRA' ? 'buy' : 'sell';
+            const strongClass = s.isStrong ? ' strong' : '';
+            const confluenceClass = s.confluence >= 90 ? 'high' : s.confluence >= 80 ? 'medium' : 'low';
+            const regimeText = s.regime === 'trending' ? 'Tendência' : s.regime === 'squeeze' ? 'Squeeze' : s.regime === 'reverting' ? 'Reversão' : 'Lateral';
+            const time = s.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            // Gerar lista de indicadores com seus estados
+            const indicatorsList = Object.entries(s.indicators).map(([key, ind]) => {
+                let btnClass = 'neutral';
+                let btnText = '---';
+                if (ind.buy) {
+                    btnClass = 'buy';
+                    btnText = 'COMPRA';
+                } else if (ind.sell) {
+                    btnClass = 'sell';
+                    btnText = 'VENDA';
+                }
+                return `
+                    <div class="indicator-row">
+                        <span class="indicator-name">${ind.name}</span>
+                        <span class="indicator-btn ${btnClass}">${btnText}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            return `
+                <div class="signal-card ${signalClass}${strongClass}">
+                    <div class="card-header">
+                        <div class="asset-info">
+                            <h3>${s.symbol.replace('USDT', '')}</h3>
+                            <div class="price">$${s.price.toFixed(s.price < 1 ? 6 : 2)}</div>
+                        </div>
+                        <span class="signal-badge ${signalClass}">${s.signal}</span>
+                    </div>
+                    
+                    <div class="confluence-bar">
+                        <div class="confluence-label">
+                            <span class="text">Confluência</span>
+                            <span class="value ${confluenceClass}">${s.confluence.toFixed(0)}%</span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-fill ${signalClass}" style="width: ${s.confluence}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="indicators-list">
+                        ${indicatorsList}
+                    </div>
+                    
+                    <div class="card-footer">
+                        <span class="time-info">Detectado às ${time}</span>
+                        <a href="https://www.tradingview.com/chart/?symbol=BINANCE:${s.symbol}.P" 
+                           target="_blank" class="chart-link">
+                            📊 Ver Gráfico
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // HISTÓRICO DE SINAIS
+        // ==========================================
+        
+        function updateSignalHistory(signals) {
+            const now = new Date();
+            
+            signals.forEach(signal => {
+                const key = `${signal.symbol}-${signal.signal}`;
+                const prevSignal = previousSignals.get(signal.symbol);
+                
+                // Verificar se é um novo sinal ou mudou de direção
+                if (!prevSignal || prevSignal.signal !== signal.signal) {
+                    // Determinar tipo de sinal
+                    let signalType;
+                    if (signal.signal === 'COMPRA') {
+                        signalType = signal.isStrong ? 'COMPRA FORTE' : 'COMPRA';
+                    } else {
+                        signalType = signal.isStrong ? 'VENDA FORTE' : 'VENDA';
+                    }
+                    
+                    // Adicionar ao histórico
+                    signalHistory.unshift({
+                        symbol: signal.symbol,
+                        signalType: signalType,
+                        confluence: signal.confluence,
+                        price: signal.price,
+                        timestamp: now,
+                        isNew: true
+                    });
+
+                    // ── AUDITORIA: registrar sinal no localStorage ──
+                    logSignalAudit(signal);
+                    
+                    // Manter apenas os últimos N itens
+                    if (signalHistory.length > CONFIG.maxHistoryItems) {
+                        signalHistory = signalHistory.slice(0, CONFIG.maxHistoryItems);
+                    }
+                }
+                
+                // Atualizar mapa de sinais anteriores
+                previousSignals.set(signal.symbol, { signal: signal.signal, timestamp: now });
+            });
+            
+            // Remover flag de "novo" após 5 segundos
+            setTimeout(() => {
+                signalHistory.forEach(h => h.isNew = false);
+            }, 5000);
+        }
+        
+        function renderHistorySection() {
+            if (signalHistory.length === 0) {
+                return `
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h2 class="history-title">
+                                <span>📜</span>
+                                Últimos Sinais Detectados
+                            </h2>
+                        </div>
+                        <div class="no-signals">
+                            <div class="icon">⏳</div>
+                            <p>Aguardando novos sinais...</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            let rows = signalHistory.map((h, index) => {
+                const time = h.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const date = h.timestamp.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                
+                let pillClass = '';
+                if (h.signalType === 'COMPRA FORTE') pillClass = 'buy-strong';
+                else if (h.signalType === 'COMPRA') pillClass = 'buy';
+                else if (h.signalType === 'VENDA FORTE') pillClass = 'sell-strong';
+                else pillClass = 'sell';
+                
+                const confluenceClass = h.confluence >= 90 ? 'high' : 'medium';
+                const newClass = h.isNew ? ' new-signal' : '';
+                
+                return `
+                    <tr class="${newClass}">
+                        <td class="asset-cell">${h.symbol.replace('USDT', '')}</td>
+                        <td class="time-cell">${date} ${time}</td>
+                        <td class="signal-cell">
+                            <span class="signal-pill ${pillClass}">${h.signalType}</span>
+                        </td>
+                        <td class="confluence-cell ${confluenceClass}">${h.confluence.toFixed(0)}%</td>
+                        <td>$${h.price.toFixed(h.price < 1 ? 6 : 2)}</td>
+                        <td>
+                            <a href="https://www.tradingview.com/chart/?symbol=BINANCE:${h.symbol}.P" 
+                               target="_blank" class="chart-link" style="padding: 4px 8px;">
+                                📊
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            return `
+                <div class="history-section">
+                    <div class="history-header">
+                        <h2 class="history-title">
+                            <span>📜</span>
+                            Últimos Sinais Detectados (${signalHistory.length})
+                        </h2>
+                    </div>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Ativo</th>
+                                <th>Data/Hora</th>
+                                <th>Sinal</th>
+                                <th>Confluência</th>
+                                <th>Preço</th>
+                                <th>Gráfico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // MÓDULO DE AUDITORIA AUTOMÁTICA v2
+        // Signal Audit Logger + Auto-Backfill Engine
+        // ==========================================
+
+        // Configurações de TP/SL automáticos (baseados em ATR)
+        const AUDIT_CONFIG = {
+            tpMultiplier:  2.0,   // TP = entryPrice ± 2.0x ATR (ajustado: backtest mostra 84% atingem)
+            slMultiplier:  1.0,   // SL = entryPrice ∓ 1.0x ATR
+            minAtrPct:     0.003, // ATR mínimo de 0.3% do preço
+            checkInterval: 60000, // checar registros pendentes a cada 1 min
+            windows: [
+                { key: '15m',  ms: 15  * 60 * 1000, interval: '1m',  limit: 20  },
+                { key: '30m',  ms: 30  * 60 * 1000, interval: '1m',  limit: 35  },
+                { key: '1h',   ms: 60  * 60 * 1000, interval: '1m',  limit: 65  },
+                { key: '4h',   ms: 240 * 60 * 1000, interval: '5m',  limit: 55  },
+            ]
+        };
+
+        /**
+         * logSignalAudit(signal)
+         * Registra um novo sinal no localStorage com todos os campos calculáveis.
+         * Os campos de resultado ficam pendentes e são preenchidos pelo autoBackfillAudit().
+         */
+        function logSignalAudit(signal) {
+            if (!signal || !signal.symbol || !signal.signal) return;
+            if (signal.signal === 'NEUTRO') return;
+
+            const dedupeKey = `${signal.symbol}::${signal.signal}`;
+            const now = Date.now();
+            const lastSeen = _auditLastSeen.get(dedupeKey) || 0;
+            if (now - lastSeen < 120000) return;
+            _auditLastSeen.set(dedupeKey, now);
+
+            const allIndicators = signal.indicators || {};
+            const buyIndicators = [], sellIndicators = [], neutralIndicators = [];
+            for (const key in allIndicators) {
+                const ind = allIndicators[key];
+                if (ind.buy)       buyIndicators.push(ind.name || key);
+                else if (ind.sell) sellIndicators.push(ind.name || key);
+                else               neutralIndicators.push(ind.name || key);
+            }
+
+            // Calcular ATR estimado para TP/SL dinâmicos
+            const price      = signal.price || 0;
+            const atrRaw     = signal.atr || (price * AUDIT_CONFIG.minAtrPct);
+            const atr        = Math.max(atrRaw, price * AUDIT_CONFIG.minAtrPct);
+            const isBuy      = signal.signal === 'COMPRA';
+            const tpPrice    = isBuy ? price + atr * AUDIT_CONFIG.tpMultiplier
+                                     : price - atr * AUDIT_CONFIG.tpMultiplier;
+            const slPrice    = isBuy ? price - atr * AUDIT_CONFIG.slMultiplier
+                                     : price + atr * AUDIT_CONFIG.slMultiplier;
+            const tpPct      = ((Math.abs(tpPrice - price) / price) * 100).toFixed(3);
+            const slPct      = ((Math.abs(slPrice - price) / price) * 100).toFixed(3);
+
+            const record = {
+                id:                `${signal.symbol}_${now}`,
+                timeframe:         CONFIG.mainTimeframe,
+                timestamp:         new Date(now).toISOString(),
+                symbol:            signal.symbol,
+                signal:            signal.signal,
+                confluence:        +(signal.confluence || 0).toFixed(2),
+                isStrong:          signal.isStrong || false,
+                entryPrice:        price,
+                rsi:               +(signal.rsi || 0).toFixed(4),
+                regime:            signal.regime || '',
+                volumeRatio:       +(signal.volumeRatio || 0).toFixed(3),
+                buyConfluence:     +(signal.buyConfluence || 0).toFixed(2),
+                sellConfluence:    +(signal.sellConfluence || 0).toFixed(2),
+                tpPrice:           +tpPrice.toFixed(price < 1 ? 8 : 4),
+                slPrice:           +slPrice.toFixed(price < 1 ? 8 : 4),
+                tpPct:             +tpPct,
+                slPct:             +slPct,
+                buyIndicators:     buyIndicators.join('|'),
+                sellIndicators:    sellIndicators.join('|'),
+                neutralIndicators: neutralIndicators.join('|'),
+                indicatorCount:    buyIndicators.length + sellIndicators.length,
+                // ── Janelas de tempo ── preenchidas automaticamente
+                priceAfter15m:  '', changePct15m:  '', directedChangePct15m: '', result15m:  '',
+                priceAfter30m:  '', changePct30m:  '', directedChangePct30m: '', result30m:  '',
+                priceAfter1h:   '', changePct1h:   '', directedChangePct1h:  '', result1h:   '',
+                priceAfter4h:   '', changePct4h:   '', directedChangePct4h:  '', result4h:   '',
+                // ── Extremos no período (preenchidos após 4h)
+                maxGainPct:     '',
+                maxLossPct:     '',
+                // ── TP / SL hit (preenchidos após confirmação)
+                hitTP:          '',
+                hitSL:          '',
+                firstHit:       '',   // 'TP' | 'SL' | 'none'
+                resolvedAt:     '',
+                // ── Filtro elite (passesEliteFilter ao momento do sinal)
+                passedEliteFilter: passesEliteFilter({...signal, indicators: allIndicators}),
+                // ── Dados de mercado de futuros (quando disponíveis)
+                fundingRate:  signal.fundingRate  !== undefined ? signal.fundingRate  : '',
+                openInterest: signal.openInterest !== undefined ? signal.openInterest : '',
+                lsRatio:      signal.lsRatio      !== undefined ? signal.lsRatio      : '',
+                takerRatio:   signal.takerRatio   !== undefined ? signal.takerRatio   : '',
+                // ── Status do backfill
+                _pending:       true, // flag interna — removida no CSV
+                _pendingWindows: AUDIT_CONFIG.windows.map(w => w.key)
+            };
+
+            let log = _loadAuditLog();
+            log.unshift(record);
+            if (log.length > AUDIT_MAX) log = log.slice(0, AUDIT_MAX);
+            _saveAuditLog(log);
+            _updateAuditCounter(log.length);
+            console.log(`[IBX Audit] ✅ Registrado: ${signal.symbol} ${signal.signal} @ ${price}`);
+        }
+
+        /**
+         * autoBackfillAudit()
+         * Roda em background. Para cada registro pendente, verifica se
+         * já passaram 15m / 30m / 1h / 4h desde o sinal e busca o preço real.
+         * Calcula variação %, resultado (win/loss/neutral), hitTP, hitSL.
+         */
+        async function autoBackfillAudit() {
+            let log = _loadAuditLog();
+            const pending = log.filter(r => r._pending);
+            if (pending.length === 0) return;
+
+            console.log(`[IBX Audit] 🔄 Backfill: ${pending.length} registro(s) pendentes`);
+            let changed = false;
+
+            for (const record of pending) {
+                const entryTs  = new Date(record.timestamp).getTime();
+                const now      = Date.now();
+                const elapsed  = now - entryTs;
+                const isBuy    = record.signal === 'COMPRA';
+                const entry    = record.entryPrice;
+                const tp       = record.tpPrice;
+                const sl       = record.slPrice;
+
+                // Processar cada janela de tempo
+                for (const w of AUDIT_CONFIG.windows) {
+                    const wKey = w.key;
+                    if (!record._pendingWindows || !record._pendingWindows.includes(wKey)) continue;
+                    if (elapsed < w.ms) continue; // ainda não chegou a hora
+
+                    try {
+                        // Buscar klines da Binance para a janela
+                        const targetTs = entryTs + w.ms;
+                        const klines   = await _fetchKlinesForBackfill(record.symbol, w.interval, targetTs, w.limit);
+                        if (!klines || klines.length === 0) continue;
+
+                        // Preço de fechamento mais próximo ao targetTs
+                        const closePrice = _findClosestClose(klines, targetTs);
+                        if (!closePrice) continue;
+
+                        const changePct = ((closePrice - entry) / entry) * 100;
+                        const directedChg = isBuy ? changePct : -changePct;
+                        const result = directedChg >= 0.15 ? 'win'
+                                     : directedChg <= -0.15 ? 'loss'
+                                     : 'neutral';
+
+                        record[`priceAfter${wKey}`]        = +closePrice.toFixed(entry < 1 ? 8 : 4);
+                        record[`changePct${wKey}`]         = +changePct.toFixed(4);
+                        record[`directedChangePct${wKey}`] = +directedChg.toFixed(4);
+                        record[`result${wKey}`]            = result;
+
+                        // Remover esta janela dos pendentes
+                        record._pendingWindows = record._pendingWindows.filter(k => k !== wKey);
+                        changed = true;
+
+                        // Para a janela de 4h: calcular max gain/loss e TP/SL hit
+                        if (wKey === '4h') {
+                            const extremes = _calcExtremes(klines, entryTs, entry, isBuy, tp, sl);
+                            record.maxGainPct = +extremes.maxGainPct.toFixed(4);
+                            record.maxLossPct = +extremes.maxLossPct.toFixed(4);
+                            record.hitTP      = extremes.hitTP ? 1 : 0;
+                            record.hitSL      = extremes.hitSL ? 1 : 0;
+                            record.firstHit   = extremes.firstHit;
+                            record.resolvedAt = extremes.resolvedAt || '';
+                        }
+                    } catch(e) {
+                        console.warn(`[IBX Audit] Erro backfill ${record.symbol} ${wKey}:`, e);
+                    }
+                }
+
+                // Se todas as janelas foram preenchidas, marcar como completo
+                if (record._pendingWindows && record._pendingWindows.length === 0) {
+                    record._pending = false;
+                    changed = true;
+                    console.log(`[IBX Audit] ✅ Completo: ${record.symbol} ${record.signal} — TP:${record.hitTP} SL:${record.hitSL}`);
+                }
+            }
+
+            if (changed) {
+                _saveAuditLog(log);
+                _updateAuditCounter(log.length);
+                _updateAuditStats(log);
+            }
+        }
+
+        /**
+         * Busca klines da Binance para o período do backfill.
+         * Usa o endpoint de futuros com startTime calculado.
+         */
+        async function _fetchKlinesForBackfill(symbol, interval, targetTs, limit) {
+            try {
+                const startTime = targetTs - (limit * _intervalToMs(interval));
+                const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&startTime=${startTime}&limit=${limit}`;
+                const resp = await fetch(url);
+                if (!resp.ok) return null;
+                return await resp.json();
+            } catch(e) { return null; }
+        }
+
+        function _intervalToMs(interval) {
+            const map = { '1m': 60000, '3m': 180000, '5m': 300000, '15m': 900000 };
+            return map[interval] || 60000;
+        }
+
+        /**
+         * Encontra o preço de fechamento mais próximo a um timestamp alvo.
+         */
+        function _findClosestClose(klines, targetTs) {
+            let best = null, bestDiff = Infinity;
+            for (const k of klines) {
+                const kTs   = k[6]; // closeTime
+                const diff  = Math.abs(kTs - targetTs);
+                if (diff < bestDiff) { bestDiff = diff; best = parseFloat(k[4]); }
+            }
+            return best;
+        }
+
+        /**
+         * Calcula máxima alta, máxima queda e se TP/SL foram atingidos.
+         * Percorre todos os candles dentro da janela de 4h.
+         */
+        function _calcExtremes(klines, entryTs, entry, isBuy, tp, sl) {
+            let maxHigh = entry, minLow = entry;
+            let hitTP = false, hitSL = false;
+            let firstHit = 'none', resolvedAt = '';
+
+            for (const k of klines) {
+                const kOpen = k[0]; // openTime
+                if (kOpen < entryTs) continue; // só candles após o sinal
+
+                const high = parseFloat(k[2]);
+                const low  = parseFloat(k[3]);
+                const ts   = new Date(k[6]).toISOString();
+
+                if (high > maxHigh) maxHigh = high;
+                if (low  < minLow)  minLow  = low;
+
+                // Checar TP
+                if (!hitTP) {
+                    const tpHit = isBuy ? high >= tp : low <= tp;
+                    if (tpHit) { hitTP = true; if (firstHit === 'none') { firstHit = 'TP'; resolvedAt = ts; } }
+                }
+                // Checar SL
+                if (!hitSL) {
+                    const slHit = isBuy ? low <= sl : high >= sl;
+                    if (slHit) { hitSL = true; if (firstHit === 'none') { firstHit = 'SL'; resolvedAt = ts; } }
+                }
+            }
+
+            const maxGainPct = isBuy ? ((maxHigh - entry) / entry * 100) : ((entry - minLow) / entry * 100);
+            const maxLossPct = isBuy ? ((entry - minLow)  / entry * 100) : ((maxHigh - entry) / entry * 100);
+
+            return { maxGainPct, maxLossPct, hitTP, hitSL, firstHit, resolvedAt };
+        }
+
+        /**
+         * Calcula e exibe estatísticas resumidas na barra de auditoria.
+         */
+        function _updateAuditStats(log) {
+            const done = log.filter(r => !r._pending);
+            if (done.length === 0) return;
+
+            const wins1h  = done.filter(r => r.result1h === 'win').length;
+            const total1h = done.filter(r => r.result1h !== '').length;
+            const hitTPc  = done.filter(r => r.hitTP === 1).length;
+            const rate1h  = total1h > 0 ? ((wins1h / total1h) * 100).toFixed(1) : '--';
+            const rateTP  = done.length > 0 ? ((hitTPc / done.length) * 100).toFixed(1) : '--';
+
+            const el = document.getElementById('auditStats');
+            if (el) {
+                el.innerHTML = `
+                    &nbsp;|&nbsp; ✅ Taxa 1h: <strong style="color:#00ff88">${rate1h}%</strong>
+                    &nbsp;| 🎯 Hit TP: <strong style="color:#ffd700">${rateTP}%</strong>
+                    &nbsp;| Concluídos: <strong>${done.length}</strong>
+                `;
+            }
+        }
+
+        /**
+         * exportSignalAuditCSV()
+         * Exporta CSV completo sem campos internos (_pending, _pendingWindows).
+         */
+        function exportSignalAuditCSV() {
+            let log = _loadAuditLog();
+            if (!log || log.length === 0) {
+                alert('Nenhum registro encontrado.\nAguarde o dashboard gerar sinais primeiro.');
+                return;
+            }
+
+            const headers = [
+                'id','timestamp','symbol','signal','timeframe','confluence','isStrong',
+                'entryPrice','rsi','regime','volumeRatio',
+                'buyConfluence','sellConfluence','indicatorCount',
+                'tpPrice','slPrice','tpPct','slPct',
+                'buyIndicators','sellIndicators','neutralIndicators',
+                'priceAfter15m','changePct15m','directedChangePct15m','result15m',
+                'priceAfter30m','changePct30m','directedChangePct30m','result30m',
+                'priceAfter1h', 'changePct1h', 'directedChangePct1h', 'result1h',
+                'priceAfter4h', 'changePct4h', 'directedChangePct4h', 'result4h',
+                'maxGainPct','maxLossPct',
+                'hitTP','hitSL','firstHit','resolvedAt',
+                'passedEliteFilter',
+                'fundingRate','openInterest','lsRatio','takerRatio'
+            ];
+
+            const csvRows = [headers.join(',')];
+            log.forEach(r => {
+                const row = headers.map(h => {
+                    const val = r[h] !== undefined && r[h] !== null ? String(r[h]) : '';
+                    return (val.includes(',') || val.includes('"') || val.includes('\n'))
+                        ? `"${val.replace(/"/g, '""')}"` : val;
+                });
+                csvRows.push(row.join(','));
+            });
+
+            const csv  = '\uFEFF' + csvRows.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const dt   = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+            link.href     = url;
+            link.download = `IBX_Audit_${dt}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            console.log(`[IBX Audit] 📥 CSV exportado: ${log.length} registros`);
+        }
+
+        /**
+         * clearSignalAuditLog()
+         */
+        function clearSignalAuditLog() {
+            const count = _getAuditCount();
+            if (count === 0) { alert('Log já está vazio.'); return; }
+            if (!confirm(`⚠️ Apagar ${count} registro(s) de auditoria?\n\nNão pode ser desfeito.`)) return;
+            localStorage.removeItem(AUDIT_KEY);
+            _auditLastSeen.clear();
+            _updateAuditCounter(0);
+            const el = document.getElementById('auditStats');
+            if (el) el.innerHTML = '';
+            console.log('[IBX Audit] 🗑️ Log limpo.');
+        }
+
+        // ── Helpers de persistência ──
+        function _loadAuditLog() {
+            try {
+                const raw = localStorage.getItem(AUDIT_KEY);
+                if (!raw) return [];
+                const log = JSON.parse(raw);
+                return Array.isArray(log) ? log : [];
+            } catch(e) { return []; }
+        }
+
+        function _saveAuditLog(log) {
+            try { localStorage.setItem(AUDIT_KEY, JSON.stringify(log)); }
+            catch(e) { console.warn('[IBX Audit] Erro ao salvar:', e); }
+        }
+
+        function _getAuditCount() {
+            return _loadAuditLog().length;
+        }
+
+        function _updateAuditCounter(count) {
+            const el = document.getElementById('auditCount');
+            if (el) el.textContent = count;
+        }
+
+        // ── Inicializar ──
+        _updateAuditCounter(_getAuditCount());
+        _updateAuditStats(_loadAuditLog());
+
+        // ── Loop de backfill automático (roda a cada 1 minuto) ──
+        setInterval(autoBackfillAudit, AUDIT_CONFIG.checkInterval);
+        // Rodar imediatamente ao carregar para preencher registros pendentes antigos
+        setTimeout(autoBackfillAudit, 5000);
+
+        // ==========================================
+        // FILTRO ELITE — Toggle e display
+        // ==========================================
+        function toggleEliteFilter() {
+            CONFIG.eliteFilterEnabled = !CONFIG.eliteFilterEnabled;
+            const btn = document.getElementById('btnEliteToggle');
+            if (btn) {
+                if (CONFIG.eliteFilterEnabled) {
+                    btn.textContent = '⭐ Elite ON';
+                    btn.style.background = 'rgba(255,215,0,0.15)';
+                    btn.style.color = '#ffd700';
+                    btn.style.border = '1px solid rgba(255,215,0,0.5)';
+                } else {
+                    btn.textContent = '○ Elite OFF';
+                    btn.style.background = 'rgba(150,150,150,0.1)';
+                    btn.style.color = '#888';
+                    btn.style.border = '1px solid rgba(150,150,150,0.3)';
+                }
+            }
+            // Reaplicar filtro nos dados já carregados
+            if (lastData) renderSignals(lastData);
+        }
+
+        // ==========================================
+        // FUNÇÕES DE CONTROLE
+        // ==========================================
+        
+        let lastData = null;
+        
+        function changeConfluence(value) {
+            CONFIG.minConfluence = parseInt(value);
+            console.log(`[IBX] Confluência mínima alterada para ${value}%`);
+            if (lastData) {
+                renderSignals(lastData);
+            }
+        }
+
+        // ==========================================
+        // INICIALIZAÇÃO E LOOP CONTÍNUO
+        // ==========================================
+        
+        let isRunning = true;
+        let cycleCount = 0;
+        let _loopTimeout = null;
+
+        async function runMonitoringLoop() {
+            if (!isRunning) return;
+            cycleCount++;
+            console.log(`[IBX] Ciclo #${cycleCount} — timeframe: ${CONFIG.mainTimeframe}`);
+            try {
+                const data = await fetchAllData();
+                renderSignals(data);
+                console.log(`[IBX] Ciclo #${cycleCount} concluído — ${data.signals.length} sinais`);
+            } catch (error) {
+                console.error(`[IBX] Erro no ciclo #${cycleCount}:`, error);
+            }
+            _loopTimeout = setTimeout(runMonitoringLoop, CONFIG.updateInterval);
+        }
+
+        // Reiniciar loop ao trocar timeframe
+        function startAnalysis() {
+            if (_loopTimeout) clearTimeout(_loopTimeout);
+            isRunning = true;
+            runMonitoringLoop();
+        }
+
+        // Iniciar monitoramento
+        startAnalysis();
+    </script>
+</body>
+</html>
