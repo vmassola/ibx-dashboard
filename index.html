@@ -1231,8 +1231,9 @@
                 longShort: { weight: 10, buy: false, sell: false, name: 'Long/Short' },
                 // Taker Ratio (peso: 10)
                 taker:     { weight: 10, buy: false, sell: false, name: 'Taker Ratio' },
-                // Fear & Greed Index (peso: 8) — sentimento macro do mercado
-                fearGreed: { weight: 8,  buy: false, sell: false, name: 'Fear & Greed' },
+                // Fear & Greed Index (peso: 0) — informativo, não entra na confluência
+                // Exibido na barra mas não distorce o cálculo dos indicadores técnicos
+                fearGreed: { weight: 0,  buy: false, sell: false, name: 'Fear & Greed' },
             };
             
             // 1. Tendência EMAs
@@ -1341,25 +1342,33 @@
                 if (tr < 0.85) indicators.taker.sell = true;
             }
 
-            // Fear & Greed Index — contexto macro
+            // Fear & Greed Index — contexto macro (informativo, peso=0)
+            // Não entra no cálculo de confluência — só registra no CSV e display
             if (marketData.fngValue !== undefined) {
                 const fv = marketData.fngValue;
-                // Extreme Fear (<25) = oportunidade de compra contrária
-                if (fv <= 25) indicators.fearGreed.buy  = true;
-                // Extreme Greed (>75) = mercado sobreaquecido = venda
-                else if (fv >= 75) indicators.fearGreed.sell = true;
-                // Fear moderado (26-45) + sinal de compra = confirma
-                else if (fv <= 45 && signal === 'COMPRA') indicators.fearGreed.buy = true;
-                // Greed moderado (56-74) + sinal de venda = confirma
-                else if (fv >= 56 && signal === 'VENDA') indicators.fearGreed.sell = true;
+                if (fv <= 25) indicators.fearGreed.buy  = true; // Extreme Fear = contexto compra
+                else if (fv >= 75) indicators.fearGreed.sell = true; // Extreme Greed = contexto venda
             }
 
             // Calcular pontuação
+            // Indicadores de futuros só entram no total se tiverem dados disponíveis
+            const FUTURES_INDICATORS = ['funding','openInt','longShort','taker'];
             for (const key in indicators) {
                 const ind = indicators[key];
-                totalPoints += ind.weight;
-                if (ind.buy) buyPoints += ind.weight;
-                if (ind.sell) sellPoints += ind.weight;
+                if (ind.weight === 0) continue; // peso 0 = só informativo
+                // Indicadores de futuros: só somam ao total se buy ou sell foi ativado
+                if (FUTURES_INDICATORS.includes(key)) {
+                    if (ind.buy || ind.sell) {
+                        totalPoints += ind.weight;
+                        if (ind.buy)  buyPoints  += ind.weight;
+                        if (ind.sell) sellPoints += ind.weight;
+                    }
+                    // Se dados não disponíveis: não entra no total (não penaliza)
+                } else {
+                    totalPoints += ind.weight;
+                    if (ind.buy)  buyPoints  += ind.weight;
+                    if (ind.sell) sellPoints += ind.weight;
+                }
             }
             
             const buyConfluence = (buyPoints / totalPoints) * 100;
