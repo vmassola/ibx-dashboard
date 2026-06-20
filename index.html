@@ -807,8 +807,12 @@
             maxHistoryItems: 10,         // Máximo de itens no histórico
             eliteFilterEnabled: true,    // Filtro de alta precisão (backtest 488 sinais)
             eliteMinConfluence: 65,      // Confluência mínima no modo elite
-            tpMultiplier: 3.0,           // TP 3:1 — backtest 4h: TP 0.90% / SL 0.30% = melhor EV
-            slMultiplier: 1.0,           // SL 1.0x ATR (ratio TP/SL = 3:1)
+            tpMultiplier: 3.0,           // TP ATR multiplicador (fallback)
+            slMultiplier: 1.0,           // SL ATR multiplicador (fallback)
+            // Modo fixo para backtest histórico — alinhado com AUDIT_CONFIG
+            useFixedPct:  true,          // true = fixo em %; false = ATR
+            tpFixedPct:   0.9,           // TP fixo 0.9%
+            slFixedPct:   0.3,           // SL fixo 0.3%
             mainTimeframe: '4h',         // Timeframe principal de análise
             mainTimeframeLabel: '4 horas',
             // Filtro horário — bloqueia 09-12h UTC (abertura europeia = 12% acerto)
@@ -1544,13 +1548,20 @@
 
                     const entryPrice = analysis.price;
                     const isBuy = analysis.signal === 'COMPRA';
-                    const atr = analysis.atr || entryPrice * 0.003;
-
-                    // Calcular TP e SL baseado no CONFIG
-                    const tp = isBuy ? entryPrice + atr * CONFIG.tpMultiplier
-                                     : entryPrice - atr * CONFIG.tpMultiplier;
-                    const sl = isBuy ? entryPrice - atr * CONFIG.slMultiplier
-                                     : entryPrice + atr * CONFIG.slMultiplier;
+                    // Calcular TP e SL: modo fixo em % ou ATR
+                    let tp, sl;
+                    if (CONFIG.useFixedPct) {
+                        tp = isBuy ? entryPrice * (1 + CONFIG.tpFixedPct/100)
+                                   : entryPrice * (1 - CONFIG.tpFixedPct/100);
+                        sl = isBuy ? entryPrice * (1 - CONFIG.slFixedPct/100)
+                                   : entryPrice * (1 + CONFIG.slFixedPct/100);
+                    } else {
+                        const atr = analysis.atr || entryPrice * 0.003;
+                        tp = isBuy ? entryPrice + atr * CONFIG.tpMultiplier
+                                   : entryPrice - atr * CONFIG.tpMultiplier;
+                        sl = isBuy ? entryPrice - atr * CONFIG.slMultiplier
+                                   : entryPrice + atr * CONFIG.slMultiplier;
+                    }
 
                     // Verificar próximos 10 candles (resultado real)
                     const future = klines.slice(i, i + 10);
@@ -1602,7 +1613,9 @@
         function _showBacktestResult({ total, tpFirst, slFirst, tpRate, avgGain, avgLoss, results, interval }) {
             const el = document.getElementById('auditStats');
             if (!el) return;
-            const ev = ((tpFirst/total) * CONFIG.tpMultiplier * 0.3 - (slFirst/total) * 0.3).toFixed(4);
+            const _tp = CONFIG.useFixedPct ? CONFIG.tpFixedPct : CONFIG.tpMultiplier * 0.3;
+            const _sl = CONFIG.useFixedPct ? CONFIG.slFixedPct : 0.3;
+            const ev = ((tpFirst/total) * _tp - (slFirst/total) * _sl).toFixed(4);
             el.innerHTML = `
                 &nbsp;|&nbsp; 📊 <strong>Backtest ${interval}</strong>:
                 ${total} sinais &nbsp;|&nbsp;
@@ -1969,7 +1982,14 @@
 
         // Configurações de TP/SL automáticos (baseados em ATR)
         const AUDIT_CONFIG = {
-            tpMultiplier:  2.0,   // TP = entryPrice ± 2.0x ATR (ajustado: backtest mostra 84% atingem)
+            // ── Modo TP/SL fixo em % (Fase 1 — validado em 1829 sinais reais)
+            // Dados: ATR de 4h gera TP médio de 6.16% — impossível atingir
+            // Solução: TP/SL fixo em % independente do timeframe
+            useFixedPct:   true,   // true = fixo em %; false = ATR multiplicador (rollback)
+            tpFixedPct:    0.9,    // TP fixo: 0.9% — validado: melhor EV nos dados reais
+            slFixedPct:    0.3,    // SL fixo: 0.3% — RR 3:1 confirmado
+            // ── Modo ATR (preservado para rollback — useFixedPct: false)
+            tpMultiplier:  2.0,   // TP = entryPrice ± 2.0x ATR
             slMultiplier:  1.0,   // SL = entryPrice ∓ 1.0x ATR
             minAtrPct:     0.003, // ATR mínimo de 0.3% do preço
             checkInterval: 60000, // checar registros pendentes a cada 1 min
@@ -2005,17 +2025,28 @@
                 else               neutralIndicators.push(ind.name || key);
             }
 
-            // Calcular ATR estimado para TP/SL dinâmicos
+            // Calcular TP/SL: modo fixo em % (Fase 1) ou ATR multiplicador (rollback)
             const price      = signal.price || 0;
-            const atrRaw     = signal.atr || (price * AUDIT_CONFIG.minAtrPct);
-            const atr        = Math.max(atrRaw, price * AUDIT_CONFIG.minAtrPct);
             const isBuy      = signal.signal === 'COMPRA';
-            const tpPrice    = isBuy ? price + atr * AUDIT_CONFIG.tpMultiplier
-                                     : price - atr * AUDIT_CONFIG.tpMultiplier;
-            const slPrice    = isBuy ? price - atr * AUDIT_CONFIG.slMultiplier
-                                     : price + atr * AUDIT_CONFIG.slMultiplier;
-            const tpPct      = ((Math.abs(tpPrice - price) / price) * 100).toFixed(3);
-            const slPct      = ((Math.abs(slPrice - price) / price) * 100).toFixed(3);
+            let tpPrice, slPrice, tpPct, slPct;
+
+            if (AUDIT_CONFIG.useFixedPct) {
+                // Modo fixo: TP 0.9% / SL 0.3% — independente do ATR e timeframe
+                tpPct    = AUDIT_CONFIG.tpFixedPct;
+                slPct    = AUDIT_CONFIG.slFixedPct;
+                tpPrice  = isBuy ? price * (1 + tpPct/100) : price * (1 - tpPct/100);
+                slPrice  = isBuy ? price * (1 - slPct/100) : price * (1 + slPct/100);
+            } else {
+                // Modo ATR: preservado para rollback
+                const atrRaw = signal.atr || (price * AUDIT_CONFIG.minAtrPct);
+                const atr    = Math.max(atrRaw, price * AUDIT_CONFIG.minAtrPct);
+                tpPrice  = isBuy ? price + atr * AUDIT_CONFIG.tpMultiplier
+                                 : price - atr * AUDIT_CONFIG.tpMultiplier;
+                slPrice  = isBuy ? price - atr * AUDIT_CONFIG.slMultiplier
+                                 : price + atr * AUDIT_CONFIG.slMultiplier;
+                tpPct    = +((Math.abs(tpPrice - price) / price) * 100).toFixed(3);
+                slPct    = +((Math.abs(slPrice - price) / price) * 100).toFixed(3);
+            }
 
             const record = {
                 id:                `${signal.symbol}_${now}`,
